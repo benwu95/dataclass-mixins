@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dataclass_mixins"
+version = "0.0.1"
+authors = [
+  { name="Ben Wu", email="benwu95@gmail.com" },
+]
+description = "An extension of Python's dataclasses that provides data type validation and commonly used conversion functions."
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+
+[project.urls]
+Homepage = "https://github.com/benwu95/dataclass-mixins"
+Issues = "https://github.com/benwu95/dataclass-mixins/issues"
