@@ -65,7 +65,7 @@ a.to_camel_case_json()
 ### Dataclass to JSON
 使用 `dataclasses.asdict()` 轉換，遇到下述的型別會做特別的處理
 - `Enum`: 轉成 `value`
-- `datetime`: 轉成 `int(timestamp())`
+- `datetime`: 轉成 `timestamp()`
 
 #### `DataclassMixin.serialize()`
 基本的轉換

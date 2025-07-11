@@ -73,7 +73,7 @@ def to_data(data) -> Any:
     if isinstance(data, Enum):
         return data.value
     if isinstance(data, datetime):
-        return int(data.timestamp())
+        return data.timestamp()
     return data
 
 
