@@ -22,6 +22,13 @@ a.to_camel_case_json()
 # {'aA': 1, 'bB': 'b'}
 ```
 
+## Coverage
+|File|Stmts|Miss|Cover(%)|Missing|
+|---|---|---|---|---|
+|[dataclass_mixin.py](https://github.com/benwu95/dataclass-mixins/blob/main/src/dataclass_mixins/dataclass_mixin.py)|246|2|99.19|[27](https://github.com/benwu95/dataclass-mixins/blob/main/src/dataclass_mixins/dataclass_mixin.py#L27), [202](https://github.com/benwu95/dataclass-mixins/blob/main/src/dataclass_mixins/dataclass_mixin.py#L202)|
+|[rule.py](https://github.com/benwu95/dataclass-mixins/blob/main/src/dataclass_mixins/rule.py)|73|1|98.63|[90](https://github.com/benwu95/dataclass-mixins/blob/main/src/dataclass_mixins/rule.py)|
+|TOTAL|319|3|99.07||
+
 ## 建立
 ### 預設值
 欄位沒有賦值的狀況下，會依據下列情況而有不同的預設值
