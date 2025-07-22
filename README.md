@@ -79,5 +79,5 @@ a.to_camel_case_json()
 ## 開發測試
 ```sh
 pip install -r tests/requirements.txt
-PYTHONPATH=./ pytest --cov=src/ --cov-report=term-missing tests/tests.py -vv -s
+PYTHONPATH=./ pytest --cov=src/ --cov-report=term-missing tests -vv -s
 ```
