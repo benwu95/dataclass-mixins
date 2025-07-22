@@ -66,15 +66,19 @@ def camel_to_snake_case(string: str):
 
 
 def to_data(data) -> Any:
-    if isinstance(data, dict):
-        return {k: to_data(v) for k, v in data.items()}
-    if isinstance(data, (list, tuple, set)):
-        return [to_data(d) for d in data]
-    if isinstance(data, Enum):
-        return data.value
-    if isinstance(data, datetime):
-        return data.timestamp()
-    return data
+    match data:
+        case dict():
+            return {k: to_data(v) for k, v in data.items()}
+        case list() | tuple() | set():
+            return [to_data(d) for d in data]
+        case Enum():
+            return data.value
+        case datetime():
+            return data.timestamp()
+        case Decimal():
+            return float(data)
+        case _:
+            return data
 
 
 def to_camel_case_data(data):
@@ -210,17 +214,31 @@ def from_data(t: type, data) -> Any:
             return WRONG_VALUE
     elif isinstance(data, Enum) and isinstance(data.value, origin_type):
         return data.value
-    elif issubclass(origin_type, datetime) and isinstance(data, (int, float)):
-        return origin_type.fromtimestamp(data, tz=timezone.utc)
+    elif issubclass(origin_type, datetime):
+        match data:
+            case int() | float():
+                return origin_type.fromtimestamp(data, tz=timezone.utc)
+            case Decimal():
+                return origin_type.fromtimestamp(float(data), tz=timezone.utc)
+            case str():
+                try:
+                    value = origin_type.fromisoformat(data)
+                    if value.tzinfo is None:
+                        value = value.replace(tzinfo=timezone.utc)
+                    return value
+                except ValueError:
+                    return WRONG_VALUE
     elif isinstance(data, datetime):
         if origin_type is int:
             return int(data.timestamp())
         if origin_type is float:
             return data.timestamp()
+        if origin_type is Decimal:
+            return Decimal(data.timestamp())
     elif origin_type is float and isinstance(data, (int, Decimal)):
         return float(data)
     elif origin_type is Decimal and isinstance(data, (int, float)):
-        return Decimal(str(data))
+        return Decimal(data)
     elif origin_type is int and isinstance(data, (float, Decimal)) and data % 1 == 0:
         return int(data)
 

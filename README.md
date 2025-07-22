@@ -41,12 +41,12 @@ a.to_camel_case_json()
 - value to value
 - `dict` or custom class to dataclass
 - value to `Enum`
-- `int` or `float` to `datetime`
+- `int`, `float`, `Decimal`, or date `str` to `datetime`
 
 遇到下述的狀況會做特別的處理
 - `Enum` to value: 判斷 value 是否符合型別
 - `datetime` to `int`: 這個狀況會轉成 `int(timestamp())`
-- `datetime` to `float`: 這個狀況會轉成 `timestamp()`
+- `datetime` to `float` or `Decimal`: 這個狀況會轉成 `timestamp()`
 
 #### `DataclassMixin.create()`
 一般的 kwargs 形式

@@ -39,6 +39,7 @@ class A(DataclassMixin):
     enum_to_value: int | None
     datetime_to_int: int | None
     datetime_to_float: float | None
+    datetime_to_decimal: Decimal | None
     float_default: float | None = FLOAT_DEFAULT
     float_default_factory: float = field(default_factory=get_1_0)
 
@@ -59,6 +60,7 @@ class AA:
         enum_to_value,
         datetime_to_int,
         datetime_to_float,
+        datetime_to_decimal,
         float_default,
         float_default_factory
     ):
@@ -75,6 +77,7 @@ class AA:
         self.enum_to_value = enum_to_value
         self.datetime_to_int = datetime_to_int
         self.datetime_to_float = datetime_to_float
+        self.datetime_to_decimal = datetime_to_decimal
         self.float_default = float_default
         self.float_default_factory = float_default_factory
 
@@ -179,8 +182,8 @@ class H(DataclassMixin):
     i: int
 
 
-now = datetime.now(timezone.utc).replace(microsecond=0)
-now2 = DateTime.now('UTC').replace(microsecond=0)
+now = datetime.now(timezone.utc)
+now2 = DateTime.now('UTC')
 
 test_a1 = A.create_strictly(
     status=Status.A,
@@ -196,6 +199,7 @@ test_a1 = A.create_strictly(
     enum_to_value=Status.C.value,
     datetime_to_int=int(now.timestamp()),
     datetime_to_float=now.timestamp(),
+    datetime_to_decimal=Decimal(now.timestamp()),
     float_default=0.1,
     float_default_factory=2.0
 )
@@ -219,6 +223,7 @@ test_aa1 = AA(
     enum_to_value=Status.C,
     datetime_to_int=now,
     datetime_to_float=now,
+    datetime_to_decimal=now,
     float_default=0.1,
     float_default_factory=2.0
 )
@@ -236,6 +241,7 @@ test_aa2 = AA(
     enum_to_value=None,
     datetime_to_int=None,
     datetime_to_float=None,
+    datetime_to_decimal=None,
     float_default=FLOAT_DEFAULT,
     float_default_factory=get_1_0()
 )
@@ -294,6 +300,7 @@ def test_field_default_data():
         'enum_to_value',
         'datetime_to_int',
         'datetime_to_float',
+        'datetime_to_decimal',
         'float_default',
         'float_default_factory'
     ]
@@ -306,11 +313,10 @@ def test_field_default_data():
 
 
 def test_from_data():
-    # int to float
-    A.create(float_default=2)
-
-    # float to int if mod 1 = 0
-    B.create(i_i=2.0)
+    # test numbers
+    H.create(d=1, f=1, i=1)
+    H.create(d=1.0, f=1.0, i=1.0)
+    H.create(d=Decimal(1), f=Decimal(1), i=Decimal(1))
 
     # test Literal
     with pytest.raises(ValueError):
@@ -320,7 +326,14 @@ def test_from_data():
     with pytest.raises(ValueError):
         A.create(status='D')
 
-    # datetime only accept datetime object or number
+    # datetime only accept datetime object, number or date str
+    A.create(now=now)
+    A.create(now=now.timestamp())
+    A.create(now=int(now.timestamp()))
+    A.create(now=Decimal(now.timestamp()))
+    A.create(now=now.isoformat())
+    a = A.create(now='20250722')
+    assert a.now.tzinfo == timezone.utc
     with pytest.raises(ValueError):
         A.create(now='A')
 
@@ -369,11 +382,6 @@ def test_from_data():
 
     with pytest.raises(ValueError):
         G.create(f={'name': 1, 'info': {'a': 1, 'b': 2}})
-
-    # test numbers
-    H.create(d=1, f=1, i=1)
-    H.create(d=1.0, f=1.0, i=1.0)
-    H.create(d=Decimal(1), f=Decimal(1), i=Decimal(1))
 
 
 def test_create_empty():
