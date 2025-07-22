@@ -1,5 +1,13 @@
 {
     "pylint.args": [
         "--disable=C0111,C0103,E1121,C0301"
-      ]
+    ],
+    "python.testing.pytestArgs": [
+        "tests/tests.py",
+        "--cov=src/",
+        "-s"
+    ],
+    "python.testing.cwd": "${workspaceFolder}",
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
 }
