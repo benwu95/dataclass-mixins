@@ -11,6 +11,12 @@ class Human:
     name: str
 
 
+@dataclass
+class HumanWithWrongDataType:
+    age: str
+    name: int
+
+
 obj = Human(age=30, name='Alice')
 
 
@@ -100,6 +106,8 @@ def test_rule_verify_false():
     ]
     rule = Rule(expressions=exps)
     assert not rule.verify(obj)
+
+    assert not rule.verify(HumanWithWrongDataType(age='thirty', name=123))
 
 
 def test_expression_invalid_operator():
