@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from enum import Enum
 from typing import Any, Literal
+from uuid import UUID, uuid4
 
 import pytest
 from pendulum.datetime import DateTime
@@ -30,6 +31,7 @@ class A(DataclassMixin):
     status_histories: list[Status]
     now: datetime
     now2: DateTime | None
+    uuid: UUID
     ASAP: Literal['A', 'B', Status.A] | None
     ASAP2: Literal['A', 'B', Status.A, None]
     is_TEST: Any
@@ -40,6 +42,7 @@ class A(DataclassMixin):
     datetime_to_int: int | None
     datetime_to_float: float | None
     datetime_to_decimal: Decimal | None
+    uuid_to_str: str | None
     float_default: float | None = FLOAT_DEFAULT
     float_default_factory: float = field(default_factory=get_1_0)
 
@@ -51,6 +54,7 @@ class AA:
         status_histories,
         now,
         now2,
+        uuid,
         ASAP,
         ASAP2,
         is_TEST,
@@ -61,6 +65,7 @@ class AA:
         datetime_to_int,
         datetime_to_float,
         datetime_to_decimal,
+        uuid_to_str,
         float_default,
         float_default_factory
     ):
@@ -68,6 +73,7 @@ class AA:
         self.status_histories = status_histories
         self.now = now
         self.now2 = now2
+        self.uuid = uuid
         self.ASAP = ASAP
         self.ASAP2 = ASAP2
         self.is_TEST = is_TEST
@@ -78,6 +84,7 @@ class AA:
         self.datetime_to_int = datetime_to_int
         self.datetime_to_float = datetime_to_float
         self.datetime_to_decimal = datetime_to_decimal
+        self.uuid_to_str = uuid_to_str
         self.float_default = float_default
         self.float_default_factory = float_default_factory
 
@@ -122,15 +129,13 @@ class D(DataclassMixin):
     tuple_dataclass: tuple[A, B, C]
     list_dataclass: list[C]
     dict_dataclass: dict[str, C]
-    set_str: set[str]
 
 
 class DD:
-    def __init__(self, tuple_dataclass, list_dataclass, dict_dataclass, set_str):
+    def __init__(self, tuple_dataclass, list_dataclass, dict_dataclass):
         self.tuple_dataclass = tuple_dataclass
         self.list_dataclass = list_dataclass
         self.dict_dataclass = dict_dataclass
-        self.set_str = set_str
 
 
 @dataclass(frozen=True)
@@ -138,6 +143,10 @@ class E(DataclassMixin):
     tuple_int_str: tuple[int, str]
     list_str: list[str]
     dict_int_str: dict[int, str]
+    set_str: set[str]
+    list_without_type: list
+    dict_without_type: dict
+    set_without_type: set
 
 
 @dataclass(frozen=True)
@@ -184,12 +193,14 @@ class H(DataclassMixin):
 
 now = datetime.now(timezone.utc)
 now2 = DateTime.now('UTC')
+test_uuid = uuid4()
 
 test_a1 = A.create_strictly(
     status=Status.A,
     status_histories=[Status.A, Status.B],
     now=now,
     now2=now2,
+    uuid=test_uuid,
     ASAP='A',
     ASAP2='B',
     is_TEST='A',
@@ -200,20 +211,22 @@ test_a1 = A.create_strictly(
     datetime_to_int=int(now.timestamp()),
     datetime_to_float=now.timestamp(),
     datetime_to_decimal=Decimal(now.timestamp()),
+    uuid_to_str=str(test_uuid),
     float_default=0.1,
     float_default_factory=2.0
 )
-test_a2 = A.create_strictly(status_histories=[Status.B, Status.C], now=now, ASAP=Status.A, is_TEST='B', str_or_enum='5')
+test_a2 = A.create_strictly(status_histories=[Status.B, Status.C], now=now, uuid=test_uuid, ASAP=Status.A, is_TEST='B', str_or_enum='5')
 test_b = B.create_strictly(i_i=4, s_s='5', dataclass=test_a1, not_frozen_or_none=None)
 test_c1 = C.create_strictly(tuple_or_none=(test_a1, test_b), list_or_none=[test_a1, test_a2], dict_or_none={'a1': test_a1, 'a2': test_a2})
 test_c2 = C.create()
-test_d = D.create_strictly(tuple_dataclass=(test_a1, test_b, test_c1), list_dataclass=[test_c1, test_c2], dict_dataclass={'c1': test_c1, 'c2': test_c2}, set_str={'a', 'b'})
+test_d = D.create_strictly(tuple_dataclass=(test_a1, test_b, test_c1), list_dataclass=[test_c1, test_c2], dict_dataclass={'c1': test_c1, 'c2': test_c2})
 
 test_aa1 = AA(
     status=Status.A,
     status_histories=[1, 2],
     now=now,
     now2=now2,
+    uuid=test_uuid,
     ASAP='A',
     ASAP2='B',
     is_TEST='A',
@@ -224,6 +237,7 @@ test_aa1 = AA(
     datetime_to_int=now,
     datetime_to_float=now,
     datetime_to_decimal=now,
+    uuid_to_str=test_uuid,
     float_default=0.1,
     float_default_factory=2.0
 )
@@ -232,6 +246,7 @@ test_aa2 = AA(
     status_histories=[2, 3],
     now=now.timestamp(),
     now2=None,
+    uuid=test_uuid,
     ASAP=Status.A.value,
     ASAP2=None,
     is_TEST='B',
@@ -242,13 +257,14 @@ test_aa2 = AA(
     datetime_to_int=None,
     datetime_to_float=None,
     datetime_to_decimal=None,
+    uuid_to_str=None,
     float_default=FLOAT_DEFAULT,
     float_default_factory=get_1_0()
 )
 test_bb = BB(i_i=4, s_s='5', dataclass=test_aa1, not_frozen_or_none=None)
 test_cc1 = CC(tuple_or_none=(test_aa1, test_bb), list_or_none=[test_aa1, test_aa2], dict_or_none={'a1': test_aa1, 'a2': test_aa2})
 test_cc2 = CC(tuple_or_none=None, list_or_none=None, dict_or_none=None)
-test_dd = DD(tuple_dataclass=(test_aa1, test_bb, test_cc1), list_dataclass=[test_cc1, test_cc2], dict_dataclass={'c1': test_cc1, 'c2': test_cc2}, set_str={'a', 'b'})
+test_dd = DD(tuple_dataclass=(test_aa1, test_bb, test_cc1), list_dataclass=[test_cc1, test_cc2], dict_dataclass={'c1': test_cc1, 'c2': test_cc2})
 
 
 def test_snake_to_camel_case():
@@ -291,6 +307,7 @@ def test_field_default_data():
         'status_histories',
         'now',
         'now2',
+        'uuid',
         'ASAP',
         'ASAP2',
         'is_TEST',
@@ -301,6 +318,7 @@ def test_field_default_data():
         'datetime_to_int',
         'datetime_to_float',
         'datetime_to_decimal',
+        'uuid_to_str',
         'float_default',
         'float_default_factory'
     ]
@@ -313,11 +331,6 @@ def test_field_default_data():
 
 
 def test_from_data():
-    # test numbers
-    H.create(d=1, f=1, i=1)
-    H.create(d=1.0, f=1.0, i=1.0)
-    H.create(d=Decimal(1), f=Decimal(1), i=Decimal(1))
-
     # test Literal
     with pytest.raises(ValueError):
         A.create(ASAP=Status.B)
@@ -337,6 +350,12 @@ def test_from_data():
     with pytest.raises(ValueError):
         A.create(now='A')
 
+    # UUID only accept UUID object or valid UUID str
+    A.create(uuid=test_uuid)
+    A.create(uuid=str(test_uuid))
+    with pytest.raises(ValueError):
+        A.create(uuid='not-a-uuid')
+
     # more_than_two_type does not contain float
     with pytest.raises(ValueError):
         A.create(more_than_two_type=1.5)
@@ -345,30 +364,39 @@ def test_from_data():
     with pytest.raises(ValueError):
         B.create(i_i=1.5)
 
-    # test list with wrong args type
+    # test list
     with pytest.raises(ValueError):
         E.create(list_str=['a', 1])
     with pytest.raises(ValueError):
         D.create(list_dataclass=[C.create(), 1])
 
-    # test tuple with wrong args type
+    # test tuple
+    d = D.create(tuple_dataclass=(A.create(), B.create(), B.create()))
+    assert d.tuple_dataclass == (A.create(), B.create(), C.create())
     with pytest.raises(ValueError):
         E.create(tuple_int_str=('a', 1))
 
-    d = D.create(tuple_dataclass=(A.create(), B.create(), B.create()))
-    assert d.tuple_dataclass == (A.create(), B.create(), C.create())
-
-    # test dict keys with wrong args type
+    # test dict keys
     with pytest.raises(ValueError):
         E.create(dict_int_str={'a': 'a'})
     with pytest.raises(ValueError):
         D.create(dict_dataclass={'a': C.create(), 2: C.create()})
 
-    # test dict values with wrong args type
+    # test dict values
     with pytest.raises(ValueError):
         E.create(dict_int_str={1: 1})
     with pytest.raises(ValueError):
         D.create(dict_dataclass={'a': C.create(), 'b': 1})
+
+    # test set
+    with pytest.raises(ValueError):
+        E.create(set_str={'a', 1})
+
+    # test container without type
+    e = E.create(list_without_type=['a', 1], dict_without_type={'a': 1, 'b': 'b'}, set_without_type={'a', 1})
+    assert e.list_without_type == ['a', 1]
+    assert e.dict_without_type == {'a': 1, 'b': 'b'}
+    assert e.set_without_type == {'a', 1}
 
     # test field with multiple dataclass
     g1 = G.create(f={'name': 'F1', 'info': {'a': 1, 'b': 'b'}})
@@ -382,6 +410,11 @@ def test_from_data():
 
     with pytest.raises(ValueError):
         G.create(f={'name': 1, 'info': {'a': 1, 'b': 2}})
+
+    # test numbers
+    H.create(d=1, f=1, i=1)
+    H.create(d=1.0, f=1.0, i=1.0)
+    H.create(d=Decimal(1), f=Decimal(1), i=Decimal(1))
 
 
 def test_create_empty():
@@ -400,11 +433,11 @@ def test_create_empty():
     assert empty_c.list_or_none is None
     assert empty_c.dict_or_none is None
 
-    empty_d = D.create()
-    assert empty_d.tuple_dataclass is None
-    assert empty_d.list_dataclass == []
-    assert empty_d.dict_dataclass == {}
-    assert empty_d.set_str == set()
+    empty_e = E.create()
+    assert empty_e.tuple_int_str is None
+    assert empty_e.list_str == []
+    assert empty_e.dict_int_str == {}
+    assert empty_e.set_str == set()
 
 
 def test_create_strictly():

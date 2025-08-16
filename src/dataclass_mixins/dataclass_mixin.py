@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from enum import Enum
 from typing import get_args, get_origin, get_type_hints, Any, Literal, Self, Union
+from uuid import UUID
 
 
 class _WRONG_VALUE_TYPE:
@@ -77,6 +78,8 @@ def to_data(data) -> Any:
             return data.timestamp()
         case Decimal():
             return float(data)
+        case UUID():
+            return str(data)
         case _:
             return data
 
@@ -241,6 +244,13 @@ def from_data(t: type, data) -> Any:
         return Decimal(data)
     elif origin_type is int and isinstance(data, (float, Decimal)) and data % 1 == 0:
         return int(data)
+    elif origin_type is UUID and isinstance(data, str):
+        try:
+            return UUID(data)
+        except ValueError:
+            return WRONG_VALUE
+    elif origin_type is str and isinstance(data, UUID):
+        return str(data)
 
     return WRONG_VALUE
 

@@ -25,9 +25,9 @@ a.to_camel_case_json()
 ## Coverage
 |File|Stmts|Miss|Cover(%)|Missing|
 |---|---|---|---|---|
-|[dataclass_mixin.py](https://github.com/benwu95/dataclass-mixins/blob/main/src/dataclass_mixins/dataclass_mixin.py)|246|2|99.19|[27](https://github.com/benwu95/dataclass-mixins/blob/main/src/dataclass_mixins/dataclass_mixin.py#L27), [202](https://github.com/benwu95/dataclass-mixins/blob/main/src/dataclass_mixins/dataclass_mixin.py#L202)|
-|[rule.py](https://github.com/benwu95/dataclass-mixins/blob/main/src/dataclass_mixins/rule.py)|73|1|98.63|[90](https://github.com/benwu95/dataclass-mixins/blob/main/src/dataclass_mixins/rule.py#L90)|
-|TOTAL|319|3|99.07||
+|[dataclass_mixin.py](https://github.com/benwu95/dataclass-mixins/blob/main/src/dataclass_mixins/dataclass_mixin.py)|256|1|99.61|[28](https://github.com/benwu95/dataclass-mixins/blob/main/src/dataclass_mixins/dataclass_mixin.py#L28)|
+|[rule.py](https://github.com/benwu95/dataclass-mixins/blob/main/src/dataclass_mixins/rule.py)|73|0|100||
+|TOTAL|329|1|99.7||
 
 ## Creation
 ### Default Values
@@ -49,11 +49,13 @@ Convert data to dataclass as much as possible
 - `dict` or custom class to dataclass
 - value to `Enum`
 - `int`, `float`, `Decimal`, or date `str` to `datetime`
+- `str` to `UUID`
 
 Special handling for the following cases:
 - `Enum` to value: Check if the value matches the type
 - `datetime` to `int`: Convert to `int(timestamp())`
 - `datetime` to `float` or `Decimal`: Convert to `timestamp()`
+- `UUID` to `str`: Convert to `str(uuid)`
 
 #### `DataclassMixin.create()`
 Standard kwargs format
@@ -73,6 +75,7 @@ Convert camel case JSON to dataclass, for example, converting frontend payload t
 Use `dataclasses.asdict()` for conversion, with special handling for:
 - `Enum`: Convert to `value`
 - `datetime`: Convert to `timestamp()`
+- `UUID`: Convert to `str(uuid)`
 
 #### `DataclassMixin.serialize()`
 Basic conversion
